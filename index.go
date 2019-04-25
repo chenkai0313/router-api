@@ -42,9 +42,9 @@ func buildRouter() *routing.Router {
 		}),
 	)
 
-	odan := router.Group("/site")
+	site := router.Group("/site")
 	siteService:= services.NeSiteService()
-	controllers.ServeSiteResource(odan,siteService)
+	controllers.ServeSiteResource(site,siteService)
 
 	return router
 
