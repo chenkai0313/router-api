@@ -9,8 +9,8 @@ func ConnectRedis() *redis.Client {
 	fmt.Printf("standalon_redis_test")
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     ""+Config.Hostname+":"+Config.Port+"",
-		Password: ""+Config.Password+"",
+		Addr:     "" + Config.Hostname + ":" + Config.Port + "",
+		Password: "" + Config.Password + "",
 		DB:       Config.Database,
 	})
 
