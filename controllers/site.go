@@ -24,7 +24,12 @@ func ServeSiteResource(rg *routing.RouteGroup, service siteService) {
 
 func (r *siteResource) index(c *routing.Context) error {
 
-	client := app.ConnectRedis()
+
+	client,err1 := app.ConnectRedis()
+	if err1!=nil{
+		fmt.Println(err1)
+	}
+
 	err := client.Set("foo", "bar", 0).Err()
 	if err != nil {
 		fmt.Printf("try set key[foo] to value[bar] error[%s]\n",

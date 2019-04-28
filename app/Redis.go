@@ -5,7 +5,7 @@ import (
 	"github.com/go-redis/redis"
 )
 
-func ConnectRedis() *redis.Client {
+func ConnectRedis()(*redis.Client,error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     "" + Config.Hostname + ":" + Config.Port + "",
 		Password: "" + Config.Password + "",
@@ -14,14 +14,9 @@ func ConnectRedis() *redis.Client {
 
 	pong, err := client.Ping().Result()
 	if err != nil {
-		fmt.Printf("ping error[%s]\n", err.Error())
-		err_handler(err)
+		return client,fmt.Errorf("ping error[%s]\n", err.Error())
 	}
 	fmt.Printf("ping result: %s\n", pong)
-	return client
+	return client,nil
 
-}
-func err_handler(err error) {
-	fmt.Printf("err_handler, error:%s\n", err.Error())
-	panic(err.Error())
 }
