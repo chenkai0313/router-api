@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 //连接mysql
