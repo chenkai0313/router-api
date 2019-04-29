@@ -42,6 +42,8 @@ func (r *siteResource) add(c *routing.Context) error {
 	}
 	fmt.Println(request)
 
+
+	
 	return c.Write(responseForm.HttpSuccessError())
 }
 
