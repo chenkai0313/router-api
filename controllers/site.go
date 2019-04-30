@@ -2,107 +2,116 @@ package controllers
 
 import (
 	"github.com/go-ozzo/ozzo-routing"
+	responseForm "router-api/response"
+	requestArticleForm "router-api/request/site"
+	responseArticle "router-api/response/site"
+	"router-api/services"
 	"fmt"
 	"router-api/app"
-	"database/sql"
-	responseForm "router-api/response"
-	requestArticleForm "router-api/request/article"
+	"time"
 )
 
 type (
 	siteService interface {
-		SiteService(name string) (error)
+		Add(services.ArticleAdd) (error)
+		Index() (services.Articles,error)
 	}
 
 	siteResource struct {
 		service siteService
 	}
 )
-type Articles []Article
 
-type Article struct {
-	id           sql.NullInt64
-	title        sql.NullString
-	content      sql.NullString
-	createdTime sql.NullInt64
-}
 
 func ServeSiteResource(rg *routing.RouteGroup, service siteService) {
 	r := &siteResource{service}
 	rg.Post("/index", r.index)
 	rg.Post("/add", r.add)
-	rg.Post("/update", r.index)
-	rg.Post("/delte", r.index)
 }
 
 func (r *siteResource) add(c *routing.Context) error {
 	var request requestArticleForm.ArticleAddRequest
+
 	if err := c.Read(&request); err != nil {
-		return c.Write(responseForm.NewClientError())
+		return c.Write(responseForm.NewClientError(err.Error()))
 	}
-	fmt.Println(request)
 
+	if err := request.Validate(); err != nil {
+		return c.Write(responseForm.NewClientError(err.Error()))
+	}
 
-	
+	article:=request.LoadParams()
+	err:=r.service.Add(article)
+	if err!=nil{
+		c.Write(responseForm.NewServerError())
+	}
 	return c.Write(responseForm.HttpSuccessError())
 }
 
-
 func (r *siteResource) index(c *routing.Context) error {
-	db, err := app.ConnectMysql()
-	if err != nil {
-		fmt.Println(err)
+	var request requestArticleForm.ArticleIndexRequest
+
+	if err := c.Read(&request); err != nil {
+		return c.Write(responseForm.NewClientError(err.Error()))
 	}
-	rows, err := db.Query("select id ,title ,content ,created_time  from article ")
-	if err != nil {
-		fmt.Println(err)
+
+	if err := request.Validate(); err != nil {
+		return c.Write(responseForm.NewClientError(err.Error()))
 	}
-	var articles Articles
-	for rows.Next() {
-		var article Article
-		if err := rows.Scan(&article.id,&article.title,&article.content,&article.createdTime); err != nil {
-			fmt.Println(err)
+	res,err:=r.service.Index()
+	if err!=nil{
+		c.Write(responseForm.NewServerError())
+	}
+
+	var contents responseArticle.Contents
+	for _,v:=range res {
+		createdTime := time.Unix(app.NullInt64(v.CreatedTime), 0).Format("2006-01-02 15:04:05")
+		content :=responseArticle.Content{
+			Id:app.NullInt64(v.Id),
+			Title:app.NullString(v.Title),
+			Content:app.NullString(v.Content),
+			CreatedTime:createdTime,
 		}
-		articles = append(articles, article)
+		contents = append(contents, content)
 	}
-	fmt.Println(articles)
 
-	//fmt.Println(app.NullString(article.title))
-
-	defer db.Close()
-
-
-	//
-	//client,err1 := app.ConnectRedis()
-	//if err1!=nil{
-	//	fmt.Println(err1)
-	//}
-	//
-	//err := client.Set("foo", "bar", 0).Err()
-	//if err != nil {
-	//	fmt.Printf("try set key[foo] to value[bar] error[%s]\n",
-	//		err.Error())
-	//	err_handler(err)
-	//}
-	//
-	//value, err := client.Get("foo").Result()
-	//if err != nil {
-	//	fmt.Printf("try get key[foo] error[%s]\n", err.Error())
-	//	err_handler(err)
-	//}
-	//
-	//fmt.Printf("key[foo]'s value is %s\n", value)
-	//
-	//defer client.Close()
-
-	name := "aaa"
-	fmt.Println(name)
-	res := r.service.SiteService(name)
-	fmt.Println(res)
-	return c.Write("test api")
+	return c.Write(responseArticle.QueryResponse{
+		BaseResponse : responseForm.BaseResponse{
+			Code:    200,
+			Message: "Success",
+		},
+		Data : contents,
+	})
 }
 
-func err_handler(err error) {
+
+func (r *siteResource) testRedis(c *routing.Context) error {
+	client,err1 := app.ConnectRedis()
+	if err1!=nil{
+		fmt.Println(err1)
+	}
+
+	err := client.Set("foo", "bar", 0).Err()
+	if err != nil {
+		fmt.Printf("try set key[foo] to value[bar] error[%s]\n",
+			err.Error())
+		errHandler(err)
+	}
+
+	value, err := client.Get("foo").Result()
+	if err != nil {
+		fmt.Printf("try get key[foo] error[%s]\n", err.Error())
+		errHandler(err)
+	}
+
+	fmt.Printf("key[foo]'s value is %s\n", value)
+
+	defer client.Close()
+
+	return c.Write("test redis")
+}
+
+func errHandler(err error) {
 	fmt.Printf("err_handler, error:%s\n", err.Error())
 	panic(err.Error())
 }

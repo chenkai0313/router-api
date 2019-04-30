@@ -12,10 +12,10 @@ func HttpSuccessError() *BaseResponse {
 	}
 }
 
-func NewClientError() *BaseResponse {
+func NewClientError(content string) *BaseResponse {
 	return &BaseResponse{
 		Code:    10001,
-		Message: "Params error",
+		Message: content,
 	}
 }
 

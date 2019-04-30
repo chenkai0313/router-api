@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS `article`;
+CREATE TABLE `article` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) DEFAULT NULL,
+  `content` varchar(1000) DEFAULT NULL,
+  `created_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `article` VALUES ('4', 'this is titile', 'this is content', '1556603704'), ('5', 'this is titile', 'this is content', '1556606288'), ('6', 'this is titile', 'this is content', '1556606288'), ('7', 'this is titile', 'this is content', '1556606290'), ('8', 'this is titile', 'this is content', '1556606291'), ('9', 'this is titile', 'this is content', '1556606292'), ('10', 'this is titile', 'this is content', '1556606293'), ('11', 'this is titile', 'this is content', '1556606293');
+

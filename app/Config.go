@@ -15,6 +15,7 @@ type appConfig struct {
 	Port       string `mapstructure:"redis_port"`
 	Password   string `mapstructure:"redis_password"`
 	DbDsn      string `mapstructure:"db_data_dsn"`
+	Token      string `mapstructure:"token"`
 }
 
 func (config appConfig) Validate() error {
@@ -24,6 +25,8 @@ func (config appConfig) Validate() error {
 		validation.Field(&config.Database, validation.NotNil),
 		validation.Field(&config.Port, validation.Required),
 		validation.Field(&config.Password, validation.Required),
+		validation.Field(&config.DbDsn, validation.Required),
+		validation.Field(&config.Token, validation.Required),
 	)
 }
 
@@ -37,6 +40,7 @@ func LoadConfig(configPaths ...string) error {
 	v.SetDefault("redis_database", 0)
 	v.SetDefault("redis_password", 0)
 	v.SetDefault("db_data_dsn", 0)
+	v.SetDefault("token", 0)
 	for _, path := range configPaths {
 		v.AddConfigPath(path)
 	}
